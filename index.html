@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Goofy Deck Scores</title>
+  <link rel="stylesheet" href="style.css?v=31">
+</head>
+<body>
+  <header>
+    <h1>Goofy Deck Scores</h1>
+  </header>
+  <main>
+    <section class="guide" aria-labelledby="how-it-works">
+      <div>
+        <h2 id="how-it-works">What is this?</h2>
+        <p>This is the goofy method I came up with to try to find decks that won a run but with fewer resources available. It's completely arbitrary with the amount of weight you put on each resource, so I thought I'd come up with a little tool to let anyone do whatever scores they want.</p>
+        <p>Just to be clear, this doesn't really show anything. It's just a neat way for me to find decks that have strong synergy or combos. They'll need to have that if we're putting a price on resources the deck needed to get there.</p>
+        <p>Once you've picked some scores you like, the tool will show the runs in order of the lowest scores found. Adjust as you like!</p>
+      </div>
+      <aside class="top-chomper"><img src="assets/chomper.png" alt="Friendly Chomper"></aside>
+    </section>
+    <section class="intro">
+      <p id="dataset-status">Loading eligible runs...</p>
+      <div class="preset-buttons"><button id="reset" type="button">FriendlyChomper's Scores</button><button id="reset-zero" class="danger" type="button">Reset to 0</button></div>
+    </section>
+    <section id="controls" aria-label="Scoring controls">
+      <div id="value-controls"></div>
+      <section class="group rarity-reference">
+        <h3>Rarity references</h3>
+        <div class="rate-tables">
+          <div>
+            <h4>Card rewards</h4>
+            <table>
+              <tbody>
+                <tr><td>Common</td><td>63%</td></tr>
+                <tr><td>Uncommon</td><td>34%</td></tr>
+                <tr><td>Rare</td><td>3%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h4>Relics</h4>
+            <table>
+              <tbody>
+                <tr><td>Common</td><td>50%</td></tr>
+                <tr><td>Uncommon</td><td>33.3%</td></tr>
+                <tr><td>Rare</td><td>16.7%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+    <section class="formula" id="example" aria-live="polite"></section>
+    <section class="results">
+      <div class="results-head">
+        <h2>Lowest-scoring wins</h2>
+        <label>Character <select id="character"><option value="all">All characters</option></select></label>
+        <label>Show <select id="limit"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label>
+      </div>
+      <div id="rows" class="run-list"></div>
+    </section>
+  </main>
+  <template id="control-template"><label class="control"><span></span><input type="number" step="1"></label></template>
+  <script src="app.js?v=32"></script>
+</body>
+</html>
