@@ -208,6 +208,7 @@ function applyDefaults() {
 
 function resetToZero() {
   values = Object.fromEntries(controlGroups.flatMap(([, controls]) => controls.map(([key]) => [key, 0])));
+  values.potions_used = 0;
   goldPerPoint = 999999999;
   renderControls();
   renderRows();
@@ -223,6 +224,6 @@ function initialise(payload) {
   applyDefaults();
 }
 
-fetch("data/runs.json?v=35").then(response => response.json()).then(initialise).catch(error => {
+fetch("data/runs.json?v=36").then(response => response.json()).then(initialise).catch(error => {
   $("#dataset-status").textContent = `Could not load site data: ${error.message}`;
 });
