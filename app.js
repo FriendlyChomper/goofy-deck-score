@@ -155,6 +155,7 @@ function renderRunCard(run, total, rank) {
     contribution: item => item.count * (values[`relic:${item.rarity}`] ?? 0),
   });
   const bosses = renderRunList(run.bosses);
+  const routeTotal = run.route.reduce((sum, item) => sum + item.count, 0);
   const route = renderRunList(run.route, {displayValue: item => item.count});
   return `<article class="run-card">
     <header>
@@ -169,7 +170,7 @@ function renderRunCard(run, total, rank) {
       <section><h3>Deck - ${deckSubtotal}</h3><ul>${deck}</ul></section>
       <section><h3>Relics - ${relicSubtotal}</h3><ul>${relics}</ul></section>
       <section><h3>Run investment - ${runSubtotal}</h3><ul>${renderRunHistory(runHistory)}</ul></section>
-      <section><h3>Bosses</h3><ul>${bosses}</ul><h3 class="route-heading">Route</h3><ul>${route}</ul></section>
+      <section><h3>Bosses</h3><ul>${bosses}</ul><h3 class="route-heading">Route - ${routeTotal}</h3><ul>${route}</ul></section>
     </div>
     <footer class="run-card-footer"><div><a href="${run.codex_url}" target="_blank" rel="noreferrer">Open in spire-codex</a><small>Run ID: ${run.id}</small></div></footer>
   </article>`;
@@ -221,6 +222,6 @@ function initialise(payload) {
   applyDefaults();
 }
 
-fetch("data/runs.json?v=33").then(response => response.json()).then(initialise).catch(error => {
+fetch("data/runs.json?v=34").then(response => response.json()).then(initialise).catch(error => {
   $("#dataset-status").textContent = `Could not load site data: ${error.message}`;
 });
