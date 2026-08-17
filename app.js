@@ -26,6 +26,7 @@ const controlGroups = [
     ["relic:Starter", "Upgraded starter"]
   ]],
 ];
+const characterOrder = ["CHARACTER.IRONCLAD", "CHARACTER.SILENT", "CHARACTER.REGENT", "CHARACTER.NECROBINDER", "CHARACTER.DEFECT"];
 let data;
 let values = {};
 let goldPerPoint = 50;
@@ -33,6 +34,10 @@ let goldPerPoint = 50;
 const $ = selector => document.querySelector(selector);
 const characterName = value => value.replace("CHARACTER.", "").replaceAll("_", " ").replace(/\b\w/g, char => char.toUpperCase());
 const characterIcon = value => value.replace("CHARACTER.", "").toLowerCase();
+const characterPosition = value => {
+  const position = characterOrder.indexOf(value);
+  return position === -1 ? characterOrder.length : position;
+};
 
 function score(run) {
   let total = run.cards_added * values.cards_added + run.upgrade_actions * values.upgrade_actions + run.removals * values.removals + run.transforms * values.transforms + run.potions_used * values.potions_used;
@@ -55,7 +60,7 @@ function calculation(run, total) {
   const runInvestmentSubtotal = subtotal(runInvestmentTerms);
   const cardSubtotal = subtotal(cardTerms);
   const relicSubtotal = subtotal(relicTerms);
-  return `<div class="calculation-heading"><strong>Example calculation</strong><span>${characterName(run.character)} - run ${run.id.slice(0, 8)}</span></div><div class="calculation-grid">${calculationColumn("Run investment", runInvestmentTerms, runInvestmentSubtotal)}${calculationColumn("Cards", cardTerms, cardSubtotal)}${calculationColumn("Relics", relicTerms, relicSubtotal)}</div><div class="calculation-total"><span>Total score</span><code>${runInvestmentSubtotal} + ${cardSubtotal} + ${relicSubtotal} =</code><strong>${total}</strong></div>`;
+  return `<div class="calculation-heading"><strong>Example calculation</strong><span>${characterName(run.character)}</span></div><div class="calculation-grid">${calculationColumn("Run investment", runInvestmentTerms, runInvestmentSubtotal)}${calculationColumn("Cards", cardTerms, cardSubtotal)}${calculationColumn("Relics", relicTerms, relicSubtotal)}</div><div class="calculation-total"><span>Total score</span><code>${runInvestmentSubtotal} + ${cardSubtotal} + ${relicSubtotal} =</code><strong>${total}</strong></div>`;
 }
 
 function subtotal(terms) {
@@ -155,7 +160,8 @@ function renderRunCard(run, total, rank) {
     contribution: item => item.count * (values[`relic:${item.rarity}`] ?? 0),
   });
   const bosses = renderRunList(run.bosses);
-  const bossStats = renderRunList([`Final HP: ${run.final_hp}`, `Final 2 boss damage: ${run.final_two_boss_damage}`]);
+  const finalHp = run.final_max_hp === undefined ? `${run.final_hp}` : `${run.final_hp}/${run.final_max_hp}`;
+  const bossStats = renderRunList([`Final HP: ${finalHp}`, `Final 2 boss damage: ${run.final_two_boss_damage}`]);
   const routeTotal = run.route.reduce((sum, item) => sum + item.count, 0);
   const route = renderRunList(run.route, {displayValue: item => item.count});
   return `<article class="run-card">
@@ -165,6 +171,7 @@ function renderRunCard(run, total, rank) {
       <strong class="run-score"><small>Score</small>${total}</strong>
       <div class="run-card-title">
         <span class="character-name"><img src="assets/characters/${characterIcon(run.character)}.png" alt="">${characterName(run.character)}</span>
+        <small class="run-seed">Seed: ${run.seed}</small>
       </div>
     </header>
     <div class="run-details">
@@ -173,7 +180,7 @@ function renderRunCard(run, total, rank) {
       <section><h3>Run investment - ${runSubtotal}</h3><ul>${renderRunHistory(runHistory)}</ul></section>
       <section><h3>Bosses</h3><ul>${bosses}${bossStats}</ul><h3 class="route-heading">Route - ${routeTotal}</h3><ul>${route}</ul></section>
     </div>
-    <footer class="run-card-footer"><div><a href="${run.codex_url}" target="_blank" rel="noreferrer">Open in spire-codex</a><small>Run ID: ${run.id}</small></div></footer>
+    <footer class="run-card-footer"><div><a href="${run.codex_url}" target="_blank" rel="noreferrer">Open in spire-codex</a></div></footer>
   </article>`;
 }
 
@@ -216,7 +223,9 @@ function resetToZero() {
 function initialise(payload) {
   data = payload;
   $("#dataset-status").textContent = `${data.run_count.toLocaleString()} eligible wins - ${data.filters.build_id} - standard solo A10`;
-  [...new Set(data.runs.map(run => run.character))].sort().forEach(character => $("#character").insertAdjacentHTML("beforeend", `<option value="${character}">${characterName(character)}</option>`));
+  [...new Set(data.runs.map(run => run.character))]
+    .sort((left, right) => characterPosition(left) - characterPosition(right) || left.localeCompare(right))
+    .forEach(character => $("#character").insertAdjacentHTML("beforeend", `<option value="${character}">${characterName(character)}</option>`));
   $("#reset").addEventListener("click", applyDefaults);
   $("#reset-zero").addEventListener("click", resetToZero);
   $("#character").addEventListener("change", renderRows);
@@ -224,6 +233,6 @@ function initialise(payload) {
   applyDefaults();
 }
 
-fetch("data/runs.json?v=36").then(response => response.json()).then(initialise).catch(error => {
+fetch("data/runs.json?v=42").then(response => response.json()).then(initialise).catch(error => {
   $("#dataset-status").textContent = `Could not load site data: ${error.message}`;
 });

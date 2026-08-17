@@ -325,6 +325,12 @@ input {
   display:flex;
   gap:6px;
 }
+.run-seed {
+  color:#858a92;
+  font-family:ui-monospace, monospace;
+  font-size:.7rem;
+  font-weight:400;
+}
 .character-name img {
   height:24px;
   object-fit:contain;
