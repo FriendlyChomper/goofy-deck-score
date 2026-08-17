@@ -1,7 +1,7 @@
 const controlGroups = [
-  ["Deck", [
-    ["deck_size", "Deck size"],
-    ["upgrades", "Upgrade"],
+  ["Run investment", [
+    ["cards_added", "Cards added"],
+    ["upgrade_actions", "Upgrade actions"],
     ["removals", "Removal"],
     ["transforms", "Transform"]
   ]],
@@ -35,16 +35,16 @@ const characterName = value => value.replace("CHARACTER.", "").replaceAll("_", "
 const characterIcon = value => value.replace("CHARACTER.", "").toLowerCase();
 
 function score(run) {
-  let total = run.deck_size * values.deck_size + run.upgrades * values.upgrades + run.removals * values.removals + run.transforms * values.transforms + run.potions_used * values.potions_used;
+  let total = run.cards_added * values.cards_added + run.upgrade_actions * values.upgrade_actions + run.removals * values.removals + run.transforms * values.transforms + run.potions_used * values.potions_used;
   for (const [type, count] of Object.entries(run.cards)) total += count * (values[`card:${type}`] ?? 0);
   for (const [type, count] of Object.entries(run.relics)) total += count * (values[`relic:${type}`] ?? 0);
   return total + Math.floor(run.gold_spent / goldPerPoint);
 }
 
 function calculation(run, total) {
-  const deckTerms = [
-    ["Deck size", run.deck_size, values.deck_size],
-    ["Upgrades", run.upgrades, values.upgrades],
+  const runInvestmentTerms = [
+    ["Cards added", run.cards_added, values.cards_added],
+    ["Upgrade actions", run.upgrade_actions, values.upgrade_actions],
     ["Removals", run.removals, values.removals],
     ["Transforms", run.transforms, values.transforms],
     ["Potions used", run.potions_used, values.potions_used],
@@ -52,10 +52,10 @@ function calculation(run, total) {
   ];
   const cardTerms = Object.entries(run.cards).map(([type, count]) => [type, count, values[`card:${type}`] ?? 0]);
   const relicTerms = Object.entries(run.relics).map(([type, count]) => [type, count, values[`relic:${type}`] ?? 0]);
-  const deckSubtotal = subtotal(deckTerms);
+  const runInvestmentSubtotal = subtotal(runInvestmentTerms);
   const cardSubtotal = subtotal(cardTerms);
   const relicSubtotal = subtotal(relicTerms);
-  return `<div class="calculation-heading"><strong>Example calculation</strong><span>${characterName(run.character)} - run ${run.id.slice(0, 8)}</span></div><div class="calculation-grid">${calculationColumn("Deck and run", deckTerms, deckSubtotal)}${calculationColumn("Cards", cardTerms, cardSubtotal)}${calculationColumn("Relics", relicTerms, relicSubtotal)}</div><div class="calculation-total"><span>Total score</span><code>${deckSubtotal} + ${cardSubtotal} + ${relicSubtotal} =</code><strong>${total}</strong></div>`;
+  return `<div class="calculation-heading"><strong>Example calculation</strong><span>${characterName(run.character)} - run ${run.id.slice(0, 8)}</span></div><div class="calculation-grid">${calculationColumn("Run investment", runInvestmentTerms, runInvestmentSubtotal)}${calculationColumn("Cards", cardTerms, cardSubtotal)}${calculationColumn("Relics", relicTerms, relicSubtotal)}</div><div class="calculation-total"><span>Total score</span><code>${runInvestmentSubtotal} + ${cardSubtotal} + ${relicSubtotal} =</code><strong>${total}</strong></div>`;
 }
 
 function subtotal(terms) {
@@ -107,8 +107,7 @@ function renderControls() {
     group.className = "group";
     group.innerHTML = `<h3>${title}</h3>`;
     for (const [key, label] of controls) addScoreControl(group, key, label);
-    if (title === "Deck") {
-      group.insertAdjacentHTML("beforeend", "<h3 class=\"subsection\">Other</h3>");
+    if (title === "Run investment") {
       addScoreControl(group, "potions_used", "Potion used");
       addGoldControl(group);
     }
@@ -138,8 +137,8 @@ function renderRunHistory(items) {
 
 function renderRunCard(run, total, rank) {
   const runHistory = [
-    ["Deck size", run.deck_size, values.deck_size],
-    ["Upgrades", run.upgrades, values.upgrades],
+    ["Cards added", run.cards_added, values.cards_added],
+    ["Upgrade actions", run.upgrade_actions, values.upgrade_actions],
     ["Removals", run.removals, values.removals],
     ["Transforms", run.transforms, values.transforms],
     ["Potions used", run.potions_used, values.potions_used],
@@ -169,7 +168,7 @@ function renderRunCard(run, total, rank) {
     <div class="run-details">
       <section><h3>Deck - ${deckSubtotal}</h3><ul>${deck}</ul></section>
       <section><h3>Relics - ${relicSubtotal}</h3><ul>${relics}</ul></section>
-      <section><h3>Deck and run - ${runSubtotal}</h3><ul>${renderRunHistory(runHistory)}</ul></section>
+      <section><h3>Run investment - ${runSubtotal}</h3><ul>${renderRunHistory(runHistory)}</ul></section>
       <section><h3>Bosses</h3><ul>${bosses}</ul><h3 class="route-heading">Route</h3><ul>${route}</ul></section>
     </div>
     <footer class="run-card-footer"><div><a href="${run.codex_url}" target="_blank" rel="noreferrer">Open in spire-codex</a><small>Run ID: ${run.id}</small></div></footer>
@@ -191,8 +190,8 @@ function applyDefaults() {
   const cards = data.defaults.cards.scores,
     relics = data.defaults.relics.scores;
   values = {
-    deck_size: 1,
-    upgrades: data.defaults.upgrades?.points_per_final_upgrade_level ?? 1,
+    cards_added: data.defaults.card_additions.points_per_card_added,
+    upgrade_actions: data.defaults.upgrades.points_per_upgrade_action,
     removals: data.defaults.deck_changes.points_per_card_removal,
     transforms: data.defaults.deck_changes.points_per_card_transform,
     potions_used: data.defaults.potions.points_per_potion_used
@@ -222,6 +221,6 @@ function initialise(payload) {
   applyDefaults();
 }
 
-fetch("data/runs.json?v=32").then(response => response.json()).then(initialise).catch(error => {
+fetch("data/runs.json?v=33").then(response => response.json()).then(initialise).catch(error => {
   $("#dataset-status").textContent = `Could not load site data: ${error.message}`;
 });
