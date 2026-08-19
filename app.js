@@ -1,6 +1,7 @@
 const controlGroups = [
   ["Run investment", [
     ["cards_added", "Cards added"],
+    ["enchanted_cards", "Enchanted cards"],
     ["upgrade_actions", "Upgrade actions"],
     ["removals", "Removal"],
     ["transforms", "Transform"]
@@ -22,7 +23,6 @@ const controlGroups = [
     ["relic:Event", "Event"],
     ["relic:Rare", "Rare"],
     ["relic:Ancient", "Ancient"],
-    ["relic:None", "None"],
     ["relic:Starter", "Upgraded starter"]
   ]],
 ];
@@ -40,7 +40,7 @@ const characterPosition = value => {
 };
 
 function score(run) {
-  let total = run.cards_added * values.cards_added + run.upgrade_actions * values.upgrade_actions + run.removals * values.removals + run.transforms * values.transforms + run.potions_used * values.potions_used;
+  let total = run.cards_added * values.cards_added + run.enchanted_cards * values.enchanted_cards + run.upgrade_actions * values.upgrade_actions + run.removals * values.removals + run.transforms * values.transforms + run.potions_used * values.potions_used;
   for (const [type, count] of Object.entries(run.cards)) total += count * (values[`card:${type}`] ?? 0);
   for (const [type, count] of Object.entries(run.relics)) total += count * (values[`relic:${type}`] ?? 0);
   return total + Math.floor(run.gold_spent / goldPerPoint);
@@ -49,6 +49,7 @@ function score(run) {
 function calculation(run, total) {
   const runInvestmentTerms = [
     ["Cards added", run.cards_added, values.cards_added],
+    ["Enchanted cards", run.enchanted_cards, values.enchanted_cards],
     ["Upgrade actions", run.upgrade_actions, values.upgrade_actions],
     ["Removals", run.removals, values.removals],
     ["Transforms", run.transforms, values.transforms],
@@ -143,6 +144,7 @@ function renderRunHistory(items) {
 function renderRunCard(run, total, rank) {
   const runHistory = [
     ["Cards added", run.cards_added, values.cards_added],
+    ["Enchanted cards", run.enchanted_cards, values.enchanted_cards],
     ["Upgrade actions", run.upgrade_actions, values.upgrade_actions],
     ["Removals", run.removals, values.removals],
     ["Transforms", run.transforms, values.transforms],
@@ -200,6 +202,7 @@ function applyDefaults() {
     relics = data.defaults.relics.scores;
   values = {
     cards_added: data.defaults.card_additions.points_per_card_added,
+    enchanted_cards: data.defaults.enchantments?.points_per_enchanted_card ?? 0,
     upgrade_actions: data.defaults.upgrades.points_per_upgrade_action,
     removals: data.defaults.deck_changes.points_per_card_removal,
     transforms: data.defaults.deck_changes.points_per_card_transform,
@@ -233,6 +236,6 @@ function initialise(payload) {
   applyDefaults();
 }
 
-fetch("data/runs.json?v=42").then(response => response.json()).then(initialise).catch(error => {
+fetch("data/runs.json?v=45").then(response => response.json()).then(initialise).catch(error => {
   $("#dataset-status").textContent = `Could not load site data: ${error.message}`;
 });
